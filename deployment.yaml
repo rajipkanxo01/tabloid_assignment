@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k8s-assignment1
+  labels:
+    app: kubernetes
+spec:
+  replicas: 1 #pod count
+  selector:
+    matchLabels:
+      app: k8s-assignment1
+  template:
+    metadata:
+      name: kubernetes
+      labels:
+        app: k8s-assignment1
+    spec:
+      containers:
+        - name: k8s-assignment1
+          image: viatabloid_assignment1:latest # Image that will be used inside the container in the cluster
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080 # The port that the container is running on the cluster
+#      restartPolicy: Always
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: k8s-assignment1
+  labels:
+    app: k8s-assignment1
+spec:
+  selector:
+    app: k8s-assignment1
+  ports:
+    - protocol: TCP
+      port: 8080 # where service is running
+      targetPort: 8080 # port exposed by service
+  type: NodePort # type of service
+
+

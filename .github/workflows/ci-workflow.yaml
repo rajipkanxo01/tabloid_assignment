@@ -1,0 +1,77 @@
+name: CI - Build and Publish Image
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.Test }}
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      - name: Run all tests in project
+        run: |
+          mvn compile && mvn test
+
+       - name: Archive code coverage results
+         uses: actions/upload-artifact@v3.1.3
+         with:
+           name: test-coverage-report
+           path: target/site/jacoco/
+           retention-days: 7
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.DOC_Assignment }}
+
+       - name: Build and push updated image
+         run: |
+           mvn package
+           docker build . --tag ghcr.io/rajipkanxo01/devops_assignment:latest
+           docker push ghcr.io/rajipkanxo01/devops_assignment:latest
+
+      - name: Get current version
+        id: version
+        run: echo "::set-output name=version::$(($(cat version || echo 0) + 1))"
+
+      - name: Save new version
+        run: echo "${{ steps.version.outputs.version }}" > version
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"          
+          git config  user.email "actions@github.com"
+          git add version
+          git commit -m "[skip ci] Bump version to ${{ steps.version.outputs.version }}"
+          git push origin master
+
+ update_coveerage_report:
+   needs: run-tests
+   permissions:
+     contents: read
+     pages: write
+     id-token: write
+   uses: ./.github/workflows/test_coverage_report.yaml

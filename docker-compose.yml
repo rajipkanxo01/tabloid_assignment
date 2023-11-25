@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  db:
+    image: "postgres:latest"
+    restart: always
+    container_name: "via_tabloid_db_container"
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=assignment1-db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=2055
+
+  backend:
+    image: "viatabloid_assignment1"
+    build:
+      context: ./
+
+    container_name: "via_tabloid_backend_container"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - spring.datasource.url=jdbc:postgresql://db:5432/assignment1-db
+      - spring.datasource.username=postgres
+      - spring.datasource.password=2055
+      - spring.jpa.hibernate.show-sql=true
+      - spring.jba.hibernate.ddl-auto=update
+volumes:
+  db:
+    driver: local
+
