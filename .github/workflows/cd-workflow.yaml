@@ -1,46 +1,46 @@
-#name: CD - Deploy to Minikube using Github Actions
-#
-#on:
-#  push:
-#    branches:
-#      - master
-#  pull_request:
-#    branches:
-#      - master
-#
-#jobs:
-#  job1:
-#    name: Build and Deploy to Minikube
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v3
-#      - name: Start Minikube
-#        id: minikube
-#        uses: medyagh/setup-minikube@latest
-#      - name: Try the cluster
-#        run: kubectl get pods -A
-#      - name: Build Image
-#        run: |
-#          export SHELL=/bin/bash
-#          eval $(minikube -p minikube docker-env)
-#          docker build -f ./Dockerfile -t viatabloid_assignment1 .
-#          echo -n "Verifying images: "
-#          docker images
-#      - name: Deploy to Minikube
-#        run: |
-#          kubectl apply -f deployment.yaml
-#          kubectl wait --for=condition=Ready pod -l app=k8s-assignment1
-#          kubectl get all
-#      - name: Test service urls
-#        run: |
-#          echo "SERVICE_URL=$(minikube service k8s-assignment1 --url)"
-#          kubectl port-forward service/k8s-assignment1 8080:8080 &
-#          sleep 5
-#          kubectl port-forward service/k8s-assignment1 8080:8080 &
-#      - name: Test the deployed service
-#        run: |
-#          curl -i http://localhost:8080/
-#      - name: Cleanup
-#        run: |
-#          eval $(minikube docker-env -u)
-#          minikube delete
+name: CD - Deploy to Minikube using Github Actions
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  job1:
+    name: Build and Deploy to Minikube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Start Minikube
+        id: minikube
+        uses: medyagh/setup-minikube@latest
+      - name: Try the cluster
+        run: kubectl get pods -A
+      - name: Build Image
+        run: |
+          export SHELL=/bin/bash
+          eval $(minikube -p minikube docker-env)
+          docker build -f ./Dockerfile -t viatabloid_assignment1 .
+          echo -n "Verifying images: "
+          docker images
+      - name: Deploy to Minikube
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl wait --for=condition=Ready pod -l app=k8s-assignment1
+          kubectl get all
+      - name: Test service urls
+        run: |
+          echo "SERVICE_URL=$(minikube service k8s-assignment1 --url)"
+          kubectl port-forward service/k8s-assignment1 8080:8080 &
+          sleep 5
+          kubectl port-forward service/k8s-assignment1 8080:8080 &
+      - name: Test the deployed service
+        run: |
+          curl -i http://localhost:8080/
+      - name: Cleanup
+        run: |
+          eval $(minikube docker-env -u)
+          minikube delete
