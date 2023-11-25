@@ -45,7 +45,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.DOC_Assignment }}
+          password: ${{ secrets.ASSIGNMENT_DOC }}
 
       - name: Get current version
         id: version
