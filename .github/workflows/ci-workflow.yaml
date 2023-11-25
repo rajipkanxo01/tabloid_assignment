@@ -3,7 +3,7 @@ name: CI - Build and Publish Image
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   run-tests:
